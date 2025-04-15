@@ -30,7 +30,7 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input type="file" accept=".log" onChange={handleFileChange} />
+      <input type="file" accept=".log" onChange={handleFileChange} className='border-2 border-black' />
       <button onClick={handleUpload}>Upload Log</button>
       {message && <p>{message}</p>}
     </div>

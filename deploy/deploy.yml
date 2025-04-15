@@ -1,0 +1,31 @@
+---
+- name: Deploy mini-soc-analyzer project
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Update APT packages
+      apt:
+        update_cache: yes
+
+    - name: Install Python3 and pip
+      apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Clone Git repo
+      git:
+        repo: https://github.com/yourusername/mini-soc-analyzer.git
+        dest: /home/{{ ansible_user }}/mini-soc-analyzer
+        version: main
+
+    - name: Install Python dependencies
+      pip:
+        requirements: /home/{{ ansible_user }}/mini-soc-analyzer/backend/requirements.txt
+
+    - name: Run Django dev server
+      shell: |
+        cd /home/{{ ansible_user }}/mini-soc-analyzer/backend
+        nohup python3 manage.py runserver 0.0.0.0:8000 &
