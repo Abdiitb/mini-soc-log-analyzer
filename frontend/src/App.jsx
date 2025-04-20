@@ -15,7 +15,7 @@ function App() {
       <FileUpload /> */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<AnomalyDashboard />} />
+        {/* <Route path="/dashboard" element={<AnomalyDashboard />} /> */}
       </Routes>
       {/* <AnomalyDashboard /> */}
     </>

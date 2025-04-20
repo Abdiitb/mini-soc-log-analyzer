@@ -80,31 +80,27 @@
 
 // src/components/LogDashboard.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+// import axios from "axios";
+import useFilterByStatusCode from "../Hooks/useFilterByStatusCode";
+// import useCategorizeAnomaly from "../Hooks/useCategorizeAnomaly";
+import AnomalyTable from "./AnomalyTable";
+import Piechart from "./Piechart";
+
+
 // You can also import Recharts components if you want to display charts
-// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function LogDashboard() {
-  // States to handle the fetched data, loading status, and errors.
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: filtered_data, loading: loading, error: error } = useFilterByStatusCode();
+  // const { data: data_categorized, loading: load, error: err } = useCategorizeAnomaly();
 
-  // Use useEffect to fetch data from the backend when this component mounts.
-  useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/detect-anomalies/")
-      .then((response) => {
-        console.log("API Response:", response.data);
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError("Error fetching data. Please try again later.");
-        setLoading(false);
-      });
-  }, []);
+  const sampleChartData = [
+    { time: '2025-04-18 00:00', count: 3 },
+    { time: '2025-04-18 01:00', count: 5 },
+    { time: '2025-04-18 02:00', count: 12 },
+    { time: '2025-04-18 03:00', count: 7 },
+    // ...
+  ];
 
   // Display loading and error states.
   if (loading) return <p>Loading...</p>;
@@ -113,19 +109,83 @@ export default function LogDashboard() {
   return (
     <div className="p-6 font-sans">
       <h2 className="text-2xl font-bold mb-4">Log Analytics Dashboard</h2>
-      <p className="mb-4">Number of anomalies detected: {data.count}</p>
 
-      <h3 className="text-xl mb-2">Suspicious Entries:</h3>
-      <ul className="list-disc ml-6">
-        {data.suspicious_entries && data.suspicious_entries.map((entry, index) => (
-          <li key={index}>{entry}</li>
-        ))}
-      </ul>
+      
+      {/* <div style={{ width: '100%', height: 400 }}>
+      <ResponsiveContainer>
+        <LineChart data={sampleChartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" angle={-45} textAnchor="end" interval={0}>
+            <Label value="Time (hourly)" position="bottom" offset={30} />
+          </XAxis>
+          <YAxis>
+            <Label
+              value="Anomaly Count"
+              angle={-90}
+              position="insideLeft"
+              style={{ textAnchor: 'middle' }}
+            />
+          </YAxis>
+          <Tooltip />
+          <Legend verticalAlign="top" height={36} />
+          <Line type="monotone" dataKey="count" stroke="#ff4d4f" strokeWidth={3} dot={{ r: 4 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div> */}
 
-      {/* If you plan to add a chart later, you can include Recharts components here.
+    {/* Line Chart */}
+    {/* <div style={{ width: "100%", height: 400 }} className="mb-6">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={sampleChartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="time" angle={-45} textAnchor="end" interval={0}>
+              <Label value="Time (hourly)" position="bottom" offset={30} />
+            </XAxis>
+            <YAxis>
+              <Label value="Anomaly Count" angle={-90} position="insideLeft" style={{ textAnchor: 'middle' }} />
+            </YAxis>
+            <Tooltip />
+            <Legend verticalAlign="top" height={36} />
+            <Line type="monotone" dataKey="count" stroke="#ff4d4f" strokeWidth={3} dot={{ r: 4 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div> */}
+     
+
+      {/* <p className="mb-4">Number of anomalies detected: {data.count}</p> */}
+
+      {/* <h3 className="text-xl mb-4">Anomalies categorized:</h3>
+      {data_categorized && Object.entries(data_categorized).map(([category, entries]) => (
+        // console.log(category, entries)
+        <div key={category} className="mb-6">
+          <h4 className="text-lg font-semibold capitalize text-amber-500">{category}:</h4>
+          <ul className="list-disc ml-6 mt-2">
+            {entries && entries.map((entry, index) => (
+              <li key={index}>
+                <span className="font-medium">IP:</span> {entry.ip},
+                <span className="font-medium"> Status:</span> {entry.status},
+                <span className="font-medium"> Time:</span> {entry.datetime}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))} */}
+
+      <Piechart filtered_data={filtered_data}/>
+
+      <AnomalyTable tableTitle={'Critical Issues'} filtered_data={filtered_data.critical}/>
+      <AnomalyTable tableTitle={'Warnings'} filtered_data={filtered_data.warning}/>
+      <AnomalyTable tableTitle={'Info'} filtered_data={filtered_data.info}/>
+
+
+    </div>
+  );
+}
+
+{/* If you plan to add a chart later, you can include Recharts components here.
           For example, a simple line chart using dummy data could be included.
           Uncomment and adjust the code below if needed. */}
-      {/*
+{/*
       <div className="h-72 mt-8">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={sampleChartData}>
@@ -138,6 +198,3 @@ export default function LogDashboard() {
         </ResponsiveContainer>
       </div>
       */}
-    </div>
-  );
-}
